@@ -16,12 +16,16 @@
 class TimeModification {
 
 public:
-    TimeModification(ros::Rate &rate);
+    TimeModification(ros::Rate &publish_rate);
     ~TimeModification(){}
 
 private:
     typedef header_manipulation::TimeModificationConfig Config;
     typedef dynamic_reconfigure::Server<Config> ReconfigureServer;
+
+    void configCB(Config &config, uint32_t level);
+    void inputCB(const topic_tools::ShapeShifter::ConstPtr &input);
+    void publishMsg(const topic_tools::ShapeShifter &msg, const ros::Time time_to_pub);
 
     ros::NodeHandle private_nh_;
     ros::Publisher generic_pub_;
@@ -31,11 +35,8 @@ private:
     bool output_advertised_;
     unsigned int seq_counter_;
 
-    ros::Duration time_offset_;
-    ros::Rate update_rate_;
-
-    void configCB(Config &config, uint32_t level);
-    void inputCB(const topic_tools::ShapeShifter::ConstPtr &input);
+    ros::Duration msg_delay_, time_offset_;
+    ros::Rate publish_rate_;
 };
 
 #endif //TIME_MODIFICATION_H
