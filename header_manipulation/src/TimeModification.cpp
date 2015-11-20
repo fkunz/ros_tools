@@ -2,7 +2,7 @@
 
 TimeModification::TimeModification(ros::Rate &publish_rate) : publish_rate_(publish_rate) {
     private_nh_ = ros::NodeHandle("~");
-    generic_sub_ = private_nh_.subscribe<topic_tools::ShapeShifter>("input", 10, &TimeModification::inputCB, this);
+    generic_sub_ = private_nh_.subscribe<topic_tools::ShapeShifter>("input", 100, &TimeModification::inputCB, this);
 
     reconf_server_.reset(new ReconfigureServer(private_nh_));
     reconf_server_->setCallback(boost::bind(&TimeModification::configCB, this, _1, _2));
