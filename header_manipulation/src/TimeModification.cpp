@@ -1,24 +1,19 @@
-#include <header_manipulation/time_modification.h>
+#include <header_manipulation/TimeModification.h>
 
-TimeModification::TimeModification(ros::Duration  *const time_offset, ros::Rate *const rate) : time_offset_(time_offset), update_rate_(rate) {
-  output_advertised_ = false;
+TimeModification::TimeModification(ros::Rate &rate) : update_rate_(rate) {
   private_nh_ = ros::NodeHandle("~");
   generic_sub_ = private_nh_.subscribe<topic_tools::ShapeShifter>("input", 10, &TimeModification::inputCB, this);
 
   reconf_server_.reset(new ReconfigureServer(private_nh_));
   reconf_server_->setCallback(boost::bind(&TimeModification::configCB, this, _1, _2));
 
+  output_advertised_ = false;
   seq_counter_ = 0;
 }
 
-TimeModification::~TimeModification() {
-    delete update_rate_;
-}
-
 void TimeModification::configCB(Config &config, uint32_t level) {
-  *update_rate_ = ros::Rate(config.update_rate);
-  boost::mutex::scoped_lock lock(mutex_);
-  *time_offset_ = ros::Duration(config.time_offset_milliseconds/1000);
+  update_rate_ = ros::Rate(config.update_rate);
+  time_offset_ = ros::Duration(config.time_offset_milliseconds/1000);
 }
 
 void TimeModification::inputCB(const topic_tools::ShapeShifter::ConstPtr &input) {
@@ -43,8 +38,7 @@ void TimeModification::inputCB(const topic_tools::ShapeShifter::ConstPtr &input)
     ROS_WARN_THROTTLE(0.1, "Probably subscribed to a topic with a message type not containing a header.");
   }
   {
-    boost::mutex::scoped_lock lock(mutex_);
-    header.stamp += *time_offset_;
+    header.stamp += time_offset_;
   }
   ((uint32_t *)msg_buffer)[0] = header.seq + seq_counter_++;
   ((uint32_t *)msg_buffer)[1] = header.stamp.sec;
@@ -54,17 +48,12 @@ void TimeModification::inputCB(const topic_tools::ShapeShifter::ConstPtr &input)
   generic_pub_.publish(output);
 }
 
-ros::Rate *const TimeModification::getUpdateRate() const {
-    return update_rate_;
-}
-
 int main(int argc, char **argv) {
   ros::init(argc, argv, "time_modification_node");
   ros::start();
-  ros::Rate *const update_rate = new ros::Rate(60);
-  ros::Duration *const time_offset = new ros::Duration(0.0);
+  ros::Rate update_rate(60);
 
-  TimeModification time_modification_node(time_offset, update_rate);
+  TimeModification time_modification_node(update_rate);
   ros::spin();
 
   return 0;

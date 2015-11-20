@@ -111,7 +111,7 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-add_executable(time_modification_node src/time_modification_node.cpp)
+add_executable(time_modification_node src/TimeModification.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
