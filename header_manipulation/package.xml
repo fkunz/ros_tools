@@ -2,7 +2,11 @@
 <package>
   <name>header_manipulation</name>
   <version>0.0.1</version>
-  <description>Allowing to manipulate header values for data streams of generic message types. </description>
+  <description>
+    Allowing to manipulate header values for data streams of generic message types.
+    The time_modification_node allows to add a time offset to each message header received an publishing it with a time delay.
+    Both parameters can be changed with dynamic reconfigure.
+  </description>
   <maintainer email="florian@fkunz.de">fkunz</maintainer>
   <license>LGPLv2.1</license>
 

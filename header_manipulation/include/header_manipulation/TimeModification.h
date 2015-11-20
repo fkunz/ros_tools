@@ -25,6 +25,7 @@ private:
 
     void configCB(Config &config, uint32_t level);
     void inputCB(const topic_tools::ShapeShifter::ConstPtr &input);
+    void manipulateRawData(uint8_t * const msg_buffer);
     void publishMsg(const topic_tools::ShapeShifter &msg, const ros::Time time_to_pub);
 
     ros::NodeHandle private_nh_;
