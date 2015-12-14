@@ -1,7 +1,7 @@
-#include <header_manipulation/TimeModification.h>
+#include <header_manipulation/HeaderManipulation.h>
 
 TimeModification::TimeModification(ros::Rate &publish_rate) :
-    publish_rate_(publish_rate)
+    publish_retry_rate_(publish_rate)
 {
     private_nh_ = ros::NodeHandle("~");
     generic_sub_ = private_nh_.subscribe<topic_tools::ShapeShifter>("input", 10,
@@ -42,7 +42,7 @@ void TimeModification::configCB(Config &config, uint32_t level)
     ROS_INFO("TimeModification configCB");
     boost::mutex::scoped_lock config_lock(config_mutex_);
     msg_delay_ = ros::Duration(config.msg_delay_milliseconds/1000);
-    publish_rate_ = ros::Rate(config.publish_rate);
+    publish_retry_rate_ = ros::Rate(config.publish_retry_rate);
     time_offset_ = ros::Duration(config.time_offset_milliseconds/1000);
 }
 
@@ -116,7 +116,7 @@ void TimeModification::publishMsgLoop(const ros::NodeHandle &nh)
                 continue;
             }
         }
-        publish_rate_.sleep();
+        publish_retry_rate_.sleep();
     }
 }
 
@@ -146,7 +146,7 @@ void TimeModification::publishMsg(const topic_tools::ShapeShifter &msg, const ro
             return;
         }
         boost::mutex::scoped_lock config_lock(config_mutex_);
-        publish_rate_.sleep();
+        publish_retry_rate_.sleep();
         end_time = ros::Time::now();
         if (initial_delay != msg_delay_)
         {
@@ -162,13 +162,13 @@ void TimeModification::publishMsg(const topic_tools::ShapeShifter &msg, const ro
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "time_modification_node");
+    ros::init(argc, argv, "header_manipulation_node");
     ros::NodeHandle nh;
     ros::Rate publish_rate(10);
 
-    TimeModification time_modification_node(publish_rate);
+    TimeModification header_manipulation_node(publish_rate);
     ROS_INFO("Constructor successfull start spinning.");
-    time_modification_node.startPublisherThread(nh);
+    header_manipulation_node.startPublisherThread(nh);
     ROS_INFO("Publisher Thread started.");
     ros::spin();
 

@@ -1,17 +1,14 @@
-#ifndef TIME_MODIFICATION_H
-#define TIME_MODIFICATION_H
+#ifndef HEADER_MANIPULATION_H
+#define HEADER_MANIPULATION_H
 
 #include <queue>
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <dynamic_reconfigure/server.h>
 #include <geometry_msgs/QuaternionStamped.h>
-#include <header_manipulation/TimeModificationConfig.h>
-#include <laser_assembler/AssembleScans2.h>
+#include <header_manipulation/HeaderManipulationConfig.h>
 #include <ros/rate.h>
 #include <ros/ros.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <sensor_msgs/JointState.h>
 #include <topic_tools/shape_shifter.h>
 #include <tf/tf.h>
 
@@ -25,7 +22,7 @@ public:
     void startPublisherThread(const ros::NodeHandle &nh);
 
 private:
-    typedef header_manipulation::TimeModificationConfig Config;
+    typedef header_manipulation::HeaderManipulationConfig Config;
     typedef dynamic_reconfigure::Server<Config> ReconfigureServer;
     typedef std::pair<topic_tools::ShapeShifter, ros::Time> StampedMsg;
     typedef std::queue<boost::shared_ptr<StampedMsg> > StampedMsgBuffer;
@@ -48,7 +45,7 @@ private:
     StampedMsgBuffer stamped_msg_buffer_;
 
     ros::Duration msg_delay_, time_offset_;
-    ros::Rate publish_rate_;
+    ros::Rate publish_retry_rate_;
 };
 
-#endif //TIME_MODIFICATION_H
+#endif  // HEADER_MANIPULATION_H
