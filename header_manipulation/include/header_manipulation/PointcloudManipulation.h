@@ -26,8 +26,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //=================================================================================================
 
-#ifndef TIME_MODIFICATION_H
-#define TIME_MODIFICATION_H
+#ifndef POINTCLOUD_MANIPULATION_H
+#define POINTCLOUD_MANIPULATION_H
 
 #include <dynamic_reconfigure/server.h>
 #include <header_manipulation/HeaderManipulationConfig.h>
@@ -37,10 +37,10 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <tf/tf.h>
 
-class ScanModification {
+class ScanManipulation {
 public:
-    ScanModification(ros::Rate &publish_rate);
-    ~ScanModification(){}
+    ScanManipulation(ros::Rate &publish_rate);
+    ~ScanManipulation(){}
 
 private:
     typedef header_manipulation::HeaderManipulationConfig Config;
@@ -60,4 +60,4 @@ private:
     ros::Rate publish_retry_rate_;
 };
 
-#endif //TIME_MODIFICATION_H
+#endif //POINTCLOUD_MANIPULATION_H

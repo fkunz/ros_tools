@@ -40,10 +40,10 @@
 #include <topic_tools/shape_shifter.h>
 #include <tf/tf.h>
 
-class TimeModification {
+class HeaderManipulation {
 public:
-    TimeModification(ros::Rate &publish_rate);
-    ~TimeModification(){}
+    HeaderManipulation(ros::Rate &publish_rate);
+    ~HeaderManipulation(){}
 
     void processShapeShifter(const topic_tools::ShapeShifter::Ptr shape_shifter);
     void processShapeShifter(topic_tools::ShapeShifter &shape_shifter);

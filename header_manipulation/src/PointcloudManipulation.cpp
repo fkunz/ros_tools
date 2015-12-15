@@ -3,7 +3,7 @@
 // All rights reserved.
 
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
+// Manipulation, are permitted provided that the following conditions are met:
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
 //     * Redistributions in binary form must reproduce the above copyright
@@ -28,21 +28,21 @@
 
 #include <header_manipulation/PointcloudManipulation.h>
 
-ScanModification::ScanModification(ros::Rate &publish_rate) :
+ScanManipulation::ScanManipulation(ros::Rate &publish_rate) :
     publish_retry_rate_(publish_rate)
 {
     nh_ = ros::NodeHandle("");
     laser_sub_ = nh_.subscribe<sensor_msgs::LaserScan>("laser_in", 100,
-                                                                    &ScanModification::laserCB, this);
+                                                                    &ScanManipulation::laserCB, this);
     pointcloud_sub_ = nh_.subscribe<sensor_msgs::PointCloud2>("pointcloud_in", 10,
-                                                                    &ScanModification::pointcloudCB, this);
+                                                                    &ScanManipulation::pointcloudCB, this);
 
     laser_pub_ = nh_.advertise<sensor_msgs::LaserScan>("laser_out", 100);
     pointcloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("pointcloud_out", 10);
 
     ros::NodeHandle private_nh("~");
     reconf_server_.reset(new ReconfigureServer(private_nh));
-    reconf_server_->setCallback(boost::bind(&ScanModification::configCB, this, _1, _2));
+    reconf_server_->setCallback(boost::bind(&ScanManipulation::configCB, this, _1, _2));
 
     private_nh.param("frame_id_new", frame_id_new_, frame_id_new_);
     private_nh.param("frame_id_to_replace", frame_id_to_replace_, frame_id_to_replace_);
@@ -59,9 +59,9 @@ ScanModification::ScanModification(ros::Rate &publish_rate) :
     }
 }
 
-void ScanModification::configCB(Config &config, uint32_t level)
+void ScanManipulation::configCB(Config &config, uint32_t level)
 {
-    ROS_INFO("PointcloudModification configCB");
+    ROS_INFO("PointcloudManipulation configCB");
     frame_id_new_ = config.frame_id_new;
     frame_id_to_replace_ = config.frame_id_to_replace;
     msg_delay_ = ros::Duration(config.msg_delay_milliseconds/1000);
@@ -69,10 +69,10 @@ void ScanModification::configCB(Config &config, uint32_t level)
     time_offset_ = ros::Duration(config.time_offset_milliseconds/1000);
 }
 
-void ScanModification::laserCB(const sensor_msgs::LaserScan::ConstPtr &input)
+void ScanManipulation::laserCB(const sensor_msgs::LaserScan::ConstPtr &input)
 {
     ros::Time start_time = ros::Time::now();
-    ROS_DEBUG("PointcloudModification laserCB. seq: %i", input->header.seq);
+    ROS_DEBUG("PointcloudManipulation laserCB. seq: %i", input->header.seq);
     sensor_msgs::LaserScan::Ptr output(new sensor_msgs::LaserScan(*input));
     output->header.stamp += time_offset_;
     if (output->header.frame_id == frame_id_to_replace_)
@@ -83,9 +83,9 @@ void ScanModification::laserCB(const sensor_msgs::LaserScan::ConstPtr &input)
     laser_pub_.publish(output);
 }
 
-void ScanModification::pointcloudCB(const sensor_msgs::PointCloud2::ConstPtr &input)
+void ScanManipulation::pointcloudCB(const sensor_msgs::PointCloud2::ConstPtr &input)
 {
-    ROS_DEBUG("PointcloudModification pointcloudCB");
+    ROS_DEBUG("PointcloudManipulation pointcloudCB");
     sensor_msgs::PointCloud2::Ptr output(new sensor_msgs::PointCloud2(*input));
     output->header.stamp += time_offset_;
     if (output->header.frame_id == frame_id_to_replace_)
@@ -98,11 +98,11 @@ void ScanModification::pointcloudCB(const sensor_msgs::PointCloud2::ConstPtr &in
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "scan_modification_node");
+    ros::init(argc, argv, "scan_Manipulation_node");
     ros::NodeHandle nh("");
     ros::Rate publish_retry_rate(10);
 
-    ScanModification scan_modification_node(publish_retry_rate);
+    ScanManipulation scan_Manipulation_node(publish_retry_rate);
     ros::spin();
 
     return 0;

@@ -3,7 +3,7 @@
 // All rights reserved.
 
 // Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
+// Manipulation, are permitted provided that the following conditions are met:
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
 //     * Redistributions in binary form must reproduce the above copyright
@@ -28,29 +28,29 @@
 
 #include <header_manipulation/HeaderManipulation.h>
 
-TimeModification::TimeModification(ros::Rate &publish_rate) :
+HeaderManipulation::HeaderManipulation(ros::Rate &publish_rate) :
     publish_retry_rate_(publish_rate)
 {
     private_nh_ = ros::NodeHandle("~");
     generic_sub_ = private_nh_.subscribe<topic_tools::ShapeShifter>("input", 10,
-                                                                    &TimeModification::inputCB, this);
+                                                                    &HeaderManipulation::inputCB, this);
 
     reconf_server_.reset(new ReconfigureServer(private_nh_));
-    reconf_server_->setCallback(boost::bind(&TimeModification::configCB, this, _1, _2));
+    reconf_server_->setCallback(boost::bind(&HeaderManipulation::configCB, this, _1, _2));
 
     output_advertised_ = false;
     seq_counter_ = 0;
 }
 
-void TimeModification::processShapeShifter(const topic_tools::ShapeShifter::Ptr shape_shifter)
+void HeaderManipulation::processShapeShifter(const topic_tools::ShapeShifter::Ptr shape_shifter)
 {
-    ROS_DEBUG("TimeModification processShapeShifter Ptr");
+    ROS_DEBUG("TimeManipulation processShapeShifter Ptr");
     processShapeShifter(*shape_shifter);
 }
 
-void TimeModification::processShapeShifter(topic_tools::ShapeShifter &shape_shifter)
+void HeaderManipulation::processShapeShifter(topic_tools::ShapeShifter &shape_shifter)
 {
-    ROS_DEBUG("TimeModification processShapeShifter");
+    ROS_DEBUG("TimeManipulation processShapeShifter");
     uint8_t msg_buffer[shape_shifter.size()];
     ros::serialization::OStream o_stream(msg_buffer, shape_shifter.size());
     manipulateRawData(msg_buffer);
@@ -58,25 +58,25 @@ void TimeModification::processShapeShifter(topic_tools::ShapeShifter &shape_shif
     shape_shifter.read(i_stream);
 }
 
-void TimeModification::startPublisherThread(const ros::NodeHandle &nh)
+void HeaderManipulation::startPublisherThread(const ros::NodeHandle &nh)
 {
-    ROS_DEBUG("TimeModification startPublisherThread");
-    boost::thread pub_thread(&TimeModification::publishMsgLoop, this, nh);
+    ROS_DEBUG("TimeManipulation startPublisherThread");
+    boost::thread pub_thread(&HeaderManipulation::publishMsgLoop, this, nh);
     pub_thread.detach();
 }
 
-void TimeModification::configCB(Config &config, uint32_t level)
+void HeaderManipulation::configCB(Config &config, uint32_t level)
 {
-    ROS_INFO("TimeModification configCB");
+    ROS_INFO("TimeManipulation configCB");
     boost::mutex::scoped_lock config_lock(config_mutex_);
     msg_delay_ = ros::Duration(config.msg_delay_milliseconds/1000);
     publish_retry_rate_ = ros::Rate(config.publish_retry_rate);
     time_offset_ = ros::Duration(config.time_offset_milliseconds/1000);
 }
 
-void TimeModification::inputCB(const topic_tools::ShapeShifter::ConstPtr &input)
+void HeaderManipulation::inputCB(const topic_tools::ShapeShifter::ConstPtr &input)
 {
-    ROS_DEBUG("TimeModification inputCB");
+    ROS_DEBUG("TimeManipulation inputCB");
     ros::Time start_time(ros::Time::now());
     // Initialize.
     if (!output_advertised_) {
@@ -104,9 +104,9 @@ void TimeModification::inputCB(const topic_tools::ShapeShifter::ConstPtr &input)
     ROS_DEBUG("all done");
 }
 
-void TimeModification::manipulateRawData(uint8_t *const msg_buffer)
+void HeaderManipulation::manipulateRawData(uint8_t *const msg_buffer)
 {
-    ROS_DEBUG("TimeModification manipulateRawData");
+    ROS_DEBUG("TimeManipulation manipulateRawData");
     std_msgs::Header header;;
     header.seq = ((uint32_t *)msg_buffer)[0];
     header.stamp.sec = ((uint32_t *)msg_buffer)[1];
@@ -129,9 +129,9 @@ void TimeModification::manipulateRawData(uint8_t *const msg_buffer)
     ((uint32_t *)msg_buffer)[2] = header.stamp.nsec;
 }
 
-void TimeModification::publishMsgLoop(const ros::NodeHandle &nh)
+void HeaderManipulation::publishMsgLoop(const ros::NodeHandle &nh)
 {
-    ROS_DEBUG("TimeModification publishMsgLoop");
+    ROS_DEBUG("TimeManipulation publishMsgLoop");
     while (nh.ok())
     {
         {
@@ -148,15 +148,15 @@ void TimeModification::publishMsgLoop(const ros::NodeHandle &nh)
     }
 }
 
-void TimeModification::publishMsg(const boost::shared_ptr<StampedMsg> stamped_msg)
+void HeaderManipulation::publishMsg(const boost::shared_ptr<StampedMsg> stamped_msg)
 {
-    ROS_DEBUG("TimeModification publishMsg");
+    ROS_DEBUG("TimeManipulation publishMsg");
     publishMsg(stamped_msg->first, stamped_msg->second);
 }
 
-void TimeModification::publishMsg(const topic_tools::ShapeShifter &msg, const ros::Time &time_to_pub)
+void HeaderManipulation::publishMsg(const topic_tools::ShapeShifter &msg, const ros::Time &time_to_pub)
 {
-    ROS_DEBUG("TimeModification publishMsg Thread started with timestamp %f", time_to_pub.toSec());
+    ROS_DEBUG("TimeManipulation publishMsg Thread started with timestamp %f", time_to_pub.toSec());
     ros::Time end_time(ros::Time::now());
     ros::Time last_time;
     config_mutex_.lock();
@@ -194,7 +194,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     ros::Rate publish_rate(10);
 
-    TimeModification header_manipulation_node(publish_rate);
+    HeaderManipulation header_manipulation_node(publish_rate);
     ROS_INFO("Constructor successfull start spinning.");
     header_manipulation_node.startPublisherThread(nh);
     ROS_INFO("Publisher Thread started.");
