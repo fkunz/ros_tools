@@ -56,6 +56,7 @@ private:
     typedef std::queue<boost::shared_ptr<StampedMsg> > StampedMsgBuffer;
 
     void configCB(Config &config, uint32_t level);
+    void debugMsgBuffer(boost::shared_array<uint8_t> &msg_buffer, uint32_t &size);
     void inputCB(const topic_tools::ShapeShifter::ConstPtr &input);
     void manipulateRawData(uint8_t *const msg_buffer);
     void publishMsg(const boost::shared_ptr<StampedMsg> stamped_msg);
@@ -71,6 +72,7 @@ private:
     boost::thread msg_publisher_thread_;
     StampedMsgBuffer stamped_msg_buffer_;
 
+    std::string frame_id_new_, frame_id_to_replace_;
     ros::Duration msg_delay_, time_offset_;
     ros::Rate publish_retry_rate_;
 };

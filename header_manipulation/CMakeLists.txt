@@ -9,17 +9,14 @@ find_package(catkin REQUIRED COMPONENTS
   topic_tools
 )
 
-
 generate_dynamic_reconfigure_options(
   cfg/HeaderManipulation.cfg
 )
-
 
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
-
 
 add_executable(scan_manipulation_node src/PointcloudManipulation.cpp)
 add_executable(header_manipulation_node src/HeaderManipulation.cpp)
