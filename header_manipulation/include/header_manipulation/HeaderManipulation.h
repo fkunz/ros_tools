@@ -42,7 +42,7 @@
 
 class HeaderManipulation {
 public:
-    HeaderManipulation(ros::Rate &publish_rate);
+    HeaderManipulation(ros::Rate &publish_retry_rate);
     ~HeaderManipulation(){}
 
     void processShapeShifter(const topic_tools::ShapeShifter::Ptr shape_shifter);
@@ -66,7 +66,6 @@ private:
     ros::Subscriber generic_sub_;
     boost::shared_ptr<ReconfigureServer> reconf_server_;
     bool output_advertised_;
-    unsigned int seq_counter_;
     ros::Publisher generic_pub_;
     boost::mutex buffer_mutex_, config_mutex_, pub_mutex_;
     boost::thread msg_publisher_thread_;

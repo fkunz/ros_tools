@@ -28,8 +28,8 @@
 
 #include <header_manipulation/PointcloudManipulation.h>
 
-ScanManipulation::ScanManipulation(ros::Rate &publish_rate) :
-    publish_retry_rate_(publish_rate)
+ScanManipulation::ScanManipulation(ros::Rate &publish_retry_rate) :
+    publish_retry_rate_(publish_retry_rate)
 {
     nh_ = ros::NodeHandle("");
     laser_sub_ = nh_.subscribe<sensor_msgs::LaserScan>("laser_in", 100,

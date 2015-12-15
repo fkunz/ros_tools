@@ -28,8 +28,8 @@
 
 #include <header_manipulation/HeaderManipulation.h>
 
-HeaderManipulation::HeaderManipulation(ros::Rate &publish_rate) :
-    publish_retry_rate_(publish_rate)
+HeaderManipulation::HeaderManipulation(ros::Rate &publish_retry_rate) :
+    publish_retry_rate_(publish_retry_rate)
 {
     private_nh_ = ros::NodeHandle("~");
     generic_sub_ = private_nh_.subscribe<topic_tools::ShapeShifter>("input", 10,
@@ -39,7 +39,6 @@ HeaderManipulation::HeaderManipulation(ros::Rate &publish_rate) :
     reconf_server_->setCallback(boost::bind(&HeaderManipulation::configCB, this, _1, _2));
 
     output_advertised_ = false;
-    seq_counter_ = 0;
 }
 
 void HeaderManipulation::processShapeShifter(const topic_tools::ShapeShifter::Ptr shape_shifter)
@@ -124,7 +123,7 @@ void HeaderManipulation::manipulateRawData(uint8_t *const msg_buffer)
               (header.stamp + time_offset_).toSec());
     header.stamp += time_offset_;
 
-    ((uint32_t *)msg_buffer)[0] = header.seq + seq_counter_++;
+    ((uint32_t *)msg_buffer)[0] = header.seq;
     ((uint32_t *)msg_buffer)[1] = header.stamp.sec;
     ((uint32_t *)msg_buffer)[2] = header.stamp.nsec;
 }
@@ -192,9 +191,9 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "header_manipulation_node");
     ros::NodeHandle nh;
-    ros::Rate publish_rate(10);
+    ros::Rate publish_retry_rate(10);
 
-    HeaderManipulation header_manipulation_node(publish_rate);
+    HeaderManipulation header_manipulation_node(publish_retry_rate);
     ROS_INFO("Constructor successfull start spinning.");
     header_manipulation_node.startPublisherThread(nh);
     ROS_INFO("Publisher Thread started.");

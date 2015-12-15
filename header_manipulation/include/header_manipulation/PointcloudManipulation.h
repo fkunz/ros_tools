@@ -39,7 +39,7 @@
 
 class ScanManipulation {
 public:
-    ScanManipulation(ros::Rate &publish_rate);
+    ScanManipulation(ros::Rate &publish_retry_rate);
     ~ScanManipulation(){}
 
 private:
@@ -60,4 +60,4 @@ private:
     ros::Rate publish_retry_rate_;
 };
 
-#endif //POINTCLOUD_MANIPULATION_H
+#endif  // POINTCLOUD_MANIPULATION_H
