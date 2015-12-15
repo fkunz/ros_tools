@@ -60,7 +60,7 @@ private:
     void inputCB(const topic_tools::ShapeShifter::ConstPtr &input);
     void manipulateRawData(uint8_t *const msg_buffer);
     void publishMsg(const boost::shared_ptr<StampedMsg> stamped_msg);
-    void publishMsg(const topic_tools::ShapeShifter &msg, const ros::Time &time_to_pub);
+    void publishMsg(const topic_tools::ShapeShifter &msg, const ros::Time &msg_in_time);
     void publishMsgLoop(const ros::NodeHandle &nh);
 
     ros::NodeHandle private_nh_;

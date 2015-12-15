@@ -120,7 +120,7 @@ void HeaderManipulation::inputCB(const topic_tools::ShapeShifter::ConstPtr &inpu
     manipulateRawData(msg_buffer);
     // Read data from array to StampedMsg
     boost::shared_ptr<StampedMsg> stamped_msg(new StampedMsg());
-    stamped_msg->second = start_time + msg_delay_;
+    stamped_msg->second = start_time;
     ros::serialization::IStream i_stream(msg_buffer, input->size());
     stamped_msg->first.read(i_stream);
     // Push StampedMsg to Buffer for multithreaded publishing.
@@ -171,10 +171,6 @@ void HeaderManipulation::manipulateRawData(uint8_t *const msg_buffer)
             ((uint8_t *)msg_buffer)[start_of_frame_id+i] = frame_id_new_.c_str()[i];
         }
     }
-
-
-
-
 }
 
 void HeaderManipulation::publishMsgLoop(const ros::NodeHandle &nh)
@@ -202,18 +198,18 @@ void HeaderManipulation::publishMsg(const boost::shared_ptr<StampedMsg> stamped_
     publishMsg(stamped_msg->first, stamped_msg->second);
 }
 
-void HeaderManipulation::publishMsg(const topic_tools::ShapeShifter &msg, const ros::Time &time_to_pub)
+void HeaderManipulation::publishMsg(const topic_tools::ShapeShifter &msg, const ros::Time &msg_in_time)
 {
-    ROS_DEBUG("HeaderManipulation publishMsg Thread started with timestamp %f", time_to_pub.toSec());
+    ROS_DEBUG("HeaderManipulation publishMsg Thread started with timestamp %f", msg_in_time.toSec());
     ros::Time end_time(ros::Time::now());
     ros::Time last_time;
     config_mutex_.lock();
-    const ros::Duration initial_delay(msg_delay_);
+    ros::Time time_to_pub(msg_in_time + msg_delay_);
     config_mutex_.unlock();
     do
     {
         last_time = end_time;
-        ROS_DEBUG("waiting to publish msg at %f", time_to_pub.toSec());
+        ROS_DEBUG("waiting to publish msg from %f at %f", msg_in_time.toSec(), time_to_pub.toSec());
         if (end_time > time_to_pub)
         {
             boost::mutex::scoped_lock pub_lock(pub_mutex_);
@@ -223,13 +219,8 @@ void HeaderManipulation::publishMsg(const topic_tools::ShapeShifter &msg, const 
         }
         boost::mutex::scoped_lock config_lock(config_mutex_);
         publish_retry_rate_.sleep();
+        time_to_pub = msg_in_time + msg_delay_;
         end_time = ros::Time::now();
-        if (initial_delay != msg_delay_)
-        {
-            ROS_WARN("Detected change of msg_delay. Dropping msg to be published at %f",
-                     time_to_pub.toSec());
-            return;
-        }
     } while (last_time <= end_time);
     ROS_WARN("Detected jump back in time. Dropping msg. last: %f, end %f",
              last_time.toSec(), end_time.toSec());
