@@ -22,9 +22,9 @@ add_executable(scan_manipulation_node src/PointcloudManipulation.cpp)
 add_executable(header_manipulation_node src/HeaderManipulation.cpp)
 add_executable(time_manipulation_node src/HeaderManipulation.cpp)
 
-add_dependencies(scan_manipulation_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
-add_dependencies(header_manipulation_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
-add_dependencies(time_manipulation_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
+add_dependencies(scan_manipulation_node ${PROJECT_NAME}_gencfg)
+add_dependencies(header_manipulation_node ${PROJECT_NAME}_gencfg)
+add_dependencies(time_manipulation_node ${PROJECT_NAME}_gencfg)
 
 target_link_libraries(scan_manipulation_node ${catkin_LIBRARIES})
 target_link_libraries(header_manipulation_node ${catkin_LIBRARIES})
