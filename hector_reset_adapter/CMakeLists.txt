@@ -7,6 +7,12 @@ find_package(catkin REQUIRED COMPONENTS
   std_srvs
 )
 
+catkin_package(
+#  INCLUDE_DIRS include
+#  LIBRARIES hector_reset_adapter
+#  CATKIN_DEPENDS std_msgs std_srvs
+)
+
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
